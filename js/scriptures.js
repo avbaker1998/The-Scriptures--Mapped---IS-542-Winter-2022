@@ -14,6 +14,7 @@ const Scriptures = (function () {
     //Constants
     const BOTTOM_PADDING = "<br /><br />";
     const CLASS_BOOKS = "books";
+    const CLASS_CHAPTER = "chapter";
     const CLASS_VOLUME = "volume";
     const CLASS_BUTTON = "btn";
     const DIV_SCRIPTURES_NAVIGATOR = "scripnav";
@@ -31,23 +32,24 @@ const Scriptures = (function () {
     let volumes;
 
     //Private Method Declarations
-    let init;
+    
     let ajax;
-    let cacheBooks;
-    let onHashChanged;
-    let htmlAnchor;
-    let htmlDiv;
-    let htmlElement;
-    let htmlLink;
-    let htmlHashLink;
-    let navigateHome;
-    let navigateBook;
-    let navigateChapter;
     let bookChapterValid;
     let booksGrid;
     let booksGridContent;
+    let cacheBooks;
     let chaptersGrid;
     let chaptersGridContent;
+    let htmlAnchor;
+    let htmlDiv;
+    let htmlElement;
+    let htmlHashLink;
+    let htmlLink;
+    let init;
+    let navigateBook;
+    let navigateChapter;
+    let navigateHome;
+    let onHashChanged;
     let volumesGridContent;
   
 
@@ -76,6 +78,44 @@ const Scriptures = (function () {
         request.onerror = failureCallback;
         request.send();
     };
+
+    
+    bookChapterValid = function (bookId, chapter) {
+        let book = books[bookId];
+
+        if (book === undefined || chapter < 0 || chapter > book.numChapters) {
+            return false;
+        }
+
+        if (chapter === 0 && book.numChapters > 0) {
+            return false;
+        }
+
+        return true;
+    };
+
+    booksGrid = function (volume) {
+        return htmlDiv({
+            classKey: CLASS_BOOKS,
+            content: booksGridContent(volume)
+        });
+    };
+
+    booksGridContent = function (volume) {
+        let gridContent = "";
+
+        volume.books.forEach(function (book) {
+            gridContent += htmlLink ({
+                classKey: CLASS_BUTTON,
+                id: book.id,
+                href: `#${volume.id}:${book.id}`,
+                content: book.gridName
+            });
+        });
+
+        return gridContent;
+    };
+
     cacheBooks = function (callback) {
         volumes.forEach(volume => {
             let volumeBooks = [];
@@ -92,6 +132,85 @@ const Scriptures = (function () {
             callback();
         }
     };
+
+    chaptersGrid = function (book) {
+        return htmlDiv({
+            classKey: CLASS_VOLUME,
+            content: htmlElement(TAG_HEADERS, book.fullName)
+        }) + htmlDiv({
+            classKey: CLASS_BOOKS,
+            content: chaptersGridContent(book)
+        });
+    };
+
+    chaptersGridContent = function (book) {
+        let gridContent = "";
+        let chapter = 1;
+
+        while (chapter <= book.numChapters) {
+            gridContent += htmlLink({
+                classKey: `${CLASS_BUTTON} ${CLASS_CHAPTER}`,
+                id: chapter,
+                href: `#0:${book.id}:${chapter}`,
+                content: chapter
+            });
+            chapter += 1;
+        }
+        return gridContent;
+    };
+
+    //idk where he wanted this put in so im putting it in here
+    htmlAnchor = function (volume) {
+        return `<a name="v${volume.id}" />`;
+    };
+
+    htmlDiv = function (parameters) {
+        let classString = "";
+        let contentString = "";
+        let idString = "";
+
+        if (parameters.classKey !== undefined) {
+            classString = ` class="${parameters.classKey}"`;
+        }
+        if (parameters.content !== undefined) {
+            contentString = parameters.content;
+        }
+        if (parameters.id !== undefined) {
+            idString = ` id="${parameters.id}"`;
+        }
+        return `<div${idString}${classString}>${contentString0}</div>`;
+    };
+
+    htmlElement = function (tagName, content) {
+        return `<${tagName}>${content}</${tagName}>`;
+    };
+
+    htmlHashLink = function (hashArguments, content) {
+        return `<a href="javascript:void(0)" onclick="changeHash(${hashArguments})">${content}</a>`;
+    };
+
+    htmlLink = function (parameters) {
+        let classString = "";
+        let contentString = "";
+        let hrefString = "";
+        let idString = "";
+
+        if (parameters.classKey !== undefined) {
+            classString = ` class="${parameters.classKey}"`;
+        }
+        if (parameters.content !== undefined) {
+            contentString = parameters.content;
+        }
+        if (parameters.href !== undefined) {
+            hrefString = ` href="${parameters.href}"`;
+        }
+        if (parameters.id !== undefined) {
+            idString = ` id="${parameters.id}"`;
+        }
+        return `<a${idString}${classString}${hrefString}>${contentString0}</a>`;
+    };
+
+    
 
     init = function (callback) {
         let booksLoaded = false;
@@ -129,54 +248,19 @@ const Scriptures = (function () {
                 }
             }
         );
-    }
-
-    bookChapterValid = function (bookId, chapter) {
-        let book = books[bookId];
-
-        if (book === undefined || chapter < 0 || chapter > book.numChapters) {
-            return false;
-        }
-
-        if (chapter === 0 && book.numChapters > 0) {
-            return false;
-        }
-
-        return true;
     };
 
-    booksGrid = function (volume) {
-        return htmlDiv({
-            classKey: CLASS_BOOKS,
-            content: booksGridContent(volume)
-        });
-    };
-
-    booksGridContent = function (volume) {
-        let gridContent = "";
-
-        volume.books.forEach(function (book) {
-            gridContent += htmlLink ({
-                classKey: CLASS_BUTTON,
-                id: book.id,
-                href: `#${volume.id}:${book.id}`,
-                content: book.gridName
-            });
-        });
-
-        return gridContent;
-    }
     navigateBook = function (bookId) {
         let book = books[bookId];
 
         if (book.numChapters <= 1) {
             navigateChapter(bookId, book.numChapters);
         } else {
-            document.getElementById(DIV_SCRIPTURES).innerHTML = htmlDiv[{
+            document.getElementById(DIV_SCRIPTURES).innerHTML = htmlDiv({
                 id: DIV_SCRIPTURES_NAVIGATOR,
                 content: chaptersGrid(book)
-            }]
-        }
+            });
+        };
         //console.log("navigateBook " + bookId);
     };
     navigateChapter = function (bookId, chapter) {
@@ -229,57 +313,6 @@ const Scriptures = (function () {
         //console.log(window.location.hash);
     };
 
-    //idk where he wanted this put in so im putting it in here
-    htmlAnchor = function (volume) {
-        return `<a name="v${volume.id}" />`;
-    };
-
-    htmlDiv = function (parameters) {
-        let classString = "";
-        let contentString = "";
-        let idString = "";
-
-        if (parameters.classKey !== undefined) {
-            classString = ` class="${parameters.classKey}"`;
-        }
-        if (parameters.content !== undefined) {
-            contentString = parameters.content;
-        }
-        if (parameters.id !== undefined) {
-            idString = ` id="${parameters.id}"`;
-        }
-        return `<div${idString}${classString}>${contentString0}</div>`;
-    };
-
-    htmlElement = function (tagName, content) {
-        return `<${tagName}>${content}</${tagName}>`;
-    };
-
-    htmlLink = function (parameters) {
-        let classString = "";
-        let contentString = "";
-        let hrefString = "";
-        let idString = "";
-
-        if (parameters.classKey !== undefined) {
-            classString = ` class="${parameters.classKey}"`;
-        }
-        if (parameters.content !== undefined) {
-            contentString = parameters.content;
-        }
-        if (parameters.href !== undefined) {
-            hrefString = ` href="${parameters.href}"`;
-        }
-        if (parameters.id !== undefined) {
-            idString = ` id="${parameters.id}"`;
-        }
-        return `<a${idString}${classString}${hrefString}>${contentString0}</a>`;
-    };
-
-    htmlHashLink = function (hashArguments, content) {
-        return `<a href="javascript:void(0)" onclick="changeHash(${hashArguments})">${content}</a>`;
-    };
-
     volumesGridContent = function (volumeId) {
         let gridContent = "";
 
@@ -299,4 +332,4 @@ const Scriptures = (function () {
         init: init,
         onHashChanged
     };
-})(); //window.location.hash.slice(1).split(":")
+})(); 
