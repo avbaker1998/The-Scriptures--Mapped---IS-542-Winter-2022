@@ -28,9 +28,9 @@
                 <div class="subtitle">By Allessandra V. Baker</div>
             </div>
         </div>
-        <div id="content"
-            <div id="scriptures" />
-            <div id="map" />
+        <div id="content">
+            <div id="scriptures"></div>/>
+            <div id="map"></div>/>
         </div>
         <!--
        <div id="scripnav">
@@ -48,6 +48,20 @@
         <br/><br/>
 
         <script src="js/scriptures.js" ></script>
+
+        <script type="text/javascript">
+            let map;
+            function initMap() {
+                map = new google.maps.Map(document.getElementById("map"), {
+                    center: {lat: 31.7683, lng: 35.2137},
+                    zoom: 8,
+                });
+            }
+        </script>
+
+        <script async
+            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDH1PQNMRrEIBgwpfn5beNKnrIm1CO-T2I&callback=initMap">
+        </script>
 
         <script type="text/javascript">
             function ready(readyListener) {
