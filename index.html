@@ -23,6 +23,7 @@
 
     <body>
         <div id="header">
+            <div id="crumbs"></div>
             <div id="centerhead">
                 <div class="title">The Scriptures, Mapped</div>
                 <div class="subtitle">By Allessandra V. Baker</div>
@@ -32,19 +33,7 @@
             <div id="scriptures"></div>/>
             <div id="map"></div>/>
         </div>
-        <!--
-       <div id="scripnav">
-            <div class="volume">
-                <a name="v1"></a>
-                <h5>Old Testament</h5>
-            </div>
-            <div class="books">
-                <a class="btn" id="101" href="#1:101">Genesis</a>
-                <a class="btn" id="102" href="#1:102">Exodus</a>
 
-            </div>
-            
-        </div>-->
         <br/><br/>
 
         <script src="js/scriptures.js" ></script>
@@ -57,13 +46,7 @@
                     zoom: 8,
                 });
             }
-        </script>
-
-        <script async
-            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDH1PQNMRrEIBgwpfn5beNKnrIm1CO-T2I&callback=initMap">
-        </script>
-
-        <script type="text/javascript">
+        
             function ready(readyListener) {
                 if (document.readyState !== "loading") {
                     readyListener();
@@ -71,11 +54,20 @@
                     document.addEventListener("DOMContentLoaded", readyListener);
                 }
             }
+            
+            function showLocation() {
+                Scriptures.showLocation(...arguments);
+            }
+
             ready(function () {
                 Scriptures.init(() => { Scriptures.onHashChanged(); });
                 window.addEventListener("hashchange", Scriptures.onHashChanged);
+                //initMap();
             });
         
+        </script>
+        <script async
+            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDH1PQNMRrEIBgwpfn5beNKnrIm1CO-T2I&callback=initMap">
         </script>
     </body>
 
